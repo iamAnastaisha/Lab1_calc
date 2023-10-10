@@ -220,9 +220,10 @@ class Calc implements ActionListener {
             return false;
         }
         int countDots = 0;
-        for (char ch : str.toCharArray()) {
-            if (ch == ',' || ch == '.') countDots++;
-            if ((!Character.isDigit(ch) && ch != ',' && ch != '.') || countDots > 1) {
+        for (int i = 0; i < str.length(); i++) {
+            if (str.charAt(0) == '-') continue;
+            if (str.charAt(i) == ',' || str.charAt(i) == '.') countDots++;
+            if ((!Character.isDigit(str.charAt(i)) && str.charAt(i) != ',' && str.charAt(i) != '.') || countDots > 1) {
                 JOptionPane.showMessageDialog(jFrame, "Number can't contain smth besides digits and one , or .!", "Dialog",
                         JOptionPane.ERROR_MESSAGE);
                 return false;
