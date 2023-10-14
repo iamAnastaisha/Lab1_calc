@@ -12,6 +12,8 @@ class Calc implements ActionListener {
     JButton beq, bclr;
     String aString = "", bString = "", cString = "", dString = "";
 
+    boolean isDividingByZero = false;
+
     static BigDecimal a = new BigDecimal("0"), b = new BigDecimal("0"),
             c = new BigDecimal("0"), d = new BigDecimal("0"), result = new BigDecimal("0");
     static int operator1 = 1, operator2 = 1, operator3 = 1;
@@ -122,24 +124,28 @@ class Calc implements ActionListener {
         if(e.getSource()==beq) {
             aString = jTextField1.getText();
             bString = jTextField2.getText();
-            boolean isOk = isStringOk(aString, 1) && isStringOk(bString, 2);
+            boolean isOk = StringProcessing.isStringOk(jFrame, aString, 1) && StringProcessing.isStringOk(jFrame, bString, 2);
             if (numOfOperands == 3) {
                 cString = jTextField3.getText();
-                isOk = isStringOk(aString, 1) && isStringOk(bString, 2) && isStringOk(cString, 3);
+                isOk = StringProcessing.isStringOk(jFrame, aString, 1)
+                        && StringProcessing.isStringOk(jFrame, bString, 2)
+                        && StringProcessing.isStringOk(jFrame, cString, 3);
             } else if (numOfOperands == 4) {
                 cString = jTextField3.getText();
                 dString = jTextField4.getText();
-                isOk = isStringOk(aString, 1) && isStringOk(bString, 2) && isStringOk(cString, 3)
-                        && isStringOk(dString, 4);
+                isOk = StringProcessing.isStringOk(jFrame, aString, 1)
+                        && StringProcessing.isStringOk(jFrame, bString, 2)
+                        && StringProcessing.isStringOk(jFrame, cString, 3)
+                        && StringProcessing.isStringOk(jFrame, dString, 4);
             }
             if (isOk) {
-                a = new BigDecimal(changeString(aString));
-                b = new BigDecimal(changeString(bString));
+                a = new BigDecimal(StringProcessing.changeString(aString));
+                b = new BigDecimal(StringProcessing.changeString(bString));
                 if (numOfOperands == 3) {
-                    c = new BigDecimal(changeString(cString));
+                    c = new BigDecimal(StringProcessing.changeString(cString));
                 } else if (numOfOperands == 4) {
-                    c = new BigDecimal(changeString(cString));
-                    d = new BigDecimal(changeString(dString));
+                    c = new BigDecimal(StringProcessing.changeString(cString));
+                    d = new BigDecimal(StringProcessing.changeString(dString));
                 }
 
                 a = a.setScale(10, RoundingMode.HALF_UP);
@@ -157,9 +163,12 @@ class Calc implements ActionListener {
                             if (Objects.equals(c, BigDecimal.ZERO.setScale(10))) {
                                 JOptionPane.showMessageDialog(jFrame, "Dividing by zero!", "Dialog",
                                         JOptionPane.ERROR_MESSAGE);
+                                jLabelResult.setText("");
+                                isDividingByZero = true;
                             } else {
                                 b = b.setScale(10, RoundingMode.HALF_UP);
                                 b = b.multiply(new BigDecimal("1.0")).divide(c, RoundingMode.HALF_UP);
+                                isDividingByZero = false;
                             }
                         }
                     }
@@ -173,9 +182,12 @@ class Calc implements ActionListener {
                         if (Objects.equals(b, BigDecimal.ZERO.setScale(10))) {
                             JOptionPane.showMessageDialog(jFrame, "Dividing by zero!", "Dialog",
                                     JOptionPane.ERROR_MESSAGE);
+                            jLabelResult.setText("");
+                            isDividingByZero = true;
                         } else {
                             result = result.setScale(10,RoundingMode.HALF_UP);
                             result = a.multiply(new BigDecimal("1.0")).divide(b,RoundingMode.HALF_UP);
+                            isDividingByZero = false;
                         }
                     }
                     default -> result = BigDecimal.ZERO;
@@ -190,16 +202,20 @@ class Calc implements ActionListener {
                             if (Objects.equals(d, BigDecimal.ZERO.setScale(10))) {
                                 JOptionPane.showMessageDialog(jFrame, "Dividing by zero!", "Dialog",
                                         JOptionPane.ERROR_MESSAGE);
+                                jLabelResult.setText("");
+                                isDividingByZero = true;
                             } else {
                                 result = result.setScale(10, RoundingMode.HALF_UP);
                                 result = result.multiply(new BigDecimal("1.0")).divide(d, RoundingMode.HALF_UP);
+                                isDividingByZero = false;
                             }
                         }
                         default -> result = BigDecimal.ZERO;
                     }
+                } if (!isDividingByZero) {
+                    result = result.setScale(6, RoundingMode.HALF_UP).stripTrailingZeros();
+                    jLabelResult.setText("Result: " + StringProcessing.changeResult(result.toPlainString()));
                 }
-                result = result.setScale(6,RoundingMode.HALF_UP);
-                jLabelResult.setText("Result: " + result.toPlainString());
             }
         }
 
@@ -213,37 +229,8 @@ class Calc implements ActionListener {
         }
     }
 
-    private boolean isStringOk(String str, int num) {
-        if (str == null || str.equals("")) {
-            JOptionPane.showMessageDialog(jFrame, "Enter " + num + " number!", "Dialog",
-                    JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-        int countDots = 0;
-        for (int i = 0; i < str.length(); i++) {
-            if (str.charAt(0) == '-') continue;
-            if (str.charAt(i) == ',' || str.charAt(i) == '.') countDots++;
-            if ((!Character.isDigit(str.charAt(i)) && str.charAt(i) != ',' && str.charAt(i) != '.') || countDots > 1) {
-                JOptionPane.showMessageDialog(jFrame, "Number can't contain smth besides digits and one , or .!", "Dialog",
-                        JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private String changeString(String str) {
-        StringBuilder sb = new StringBuilder(str);
-        for (int i = 0; i < str.length(); i++) {
-            if (str.charAt(i) == ',') {
-                sb.replace(i, i + 1, ".");
-                break;
-            }
-        }
-        return sb.toString();
-    }
-
     public static void main(String...s) {
         new Calc();
     }
 }
+
