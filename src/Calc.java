@@ -194,6 +194,25 @@ class Calc implements ActionListener {
                     }
                 }
 
+                if (numOfOperands == 4 && operator1 <= 2 && operator3 >= 3) {
+                    switch (operator3) {
+                        case 3 -> b = b.multiply(d);
+                        case 4 -> {
+                            if (Objects.equals(d, BigDecimal.ZERO.setScale(10))) {
+                                JOptionPane.showMessageDialog(jFrame, "Dividing by zero!", "Dialog",
+                                        JOptionPane.ERROR_MESSAGE);
+                                jLabelResult.setText("");
+                                isDividingByZero = true;
+                            } else {
+                                b = b.setScale(10, roundingMode);
+                                b = b.multiply(new BigDecimal("1.0")).divide(d, roundingMode);
+                                isDividingByZero = false;
+                            }
+                        }
+                        default -> result = BigDecimal.ZERO;
+                    }
+                }
+
                 switch (operator1) {
                     case 1 -> result = a.add(b);
                     case 2 -> result = a.subtract(b);
@@ -213,7 +232,7 @@ class Calc implements ActionListener {
                     default -> result = BigDecimal.ZERO;
                 }
 
-                if (numOfOperands == 4) {
+                if (numOfOperands == 4 && !(operator1 <= 2 && operator3 >= 3)) {
                     switch (operator3) {
                         case 1 -> result = result.add(d);
                         case 2 -> result = result.subtract(d);
@@ -232,7 +251,8 @@ class Calc implements ActionListener {
                         }
                         default -> result = BigDecimal.ZERO;
                     }
-                } if (!isDividingByZero) {
+                }
+                if (!isDividingByZero) {
                     result = result.setScale(6, roundingMode).stripTrailingZeros();
                     jLabelResult.setText("Result: " + StringProcessing.changeResult(result.toPlainString()));
                 }
